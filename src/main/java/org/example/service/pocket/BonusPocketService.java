@@ -188,7 +188,24 @@ public class BonusPocketService implements PocketServiceInterface {
                     .userId(transaction.getUserId())
                     .build());
         }
+    }
 
+    public void cancelBonus(Long userId) {
+        PocketTransactionEntity transaction = transactionRepository.save(PocketTransactionEntity.builder()
+                .type(PocketTransactionType.BONUS_ACCRUAL)
+                .userId(userId)
+                .createdAt(LocalDateTime.now())
+                .build());
+        pocketRepository.getBalance(userId, List.of(PocketType.BONUS))
+                .stream()
+                .forEach(money -> pocketRepository.save(PocketEntity.builder()
+                        .money(Money.builder().amount(-money.getAmount()).currency(money.getCurrency()).build())
+                        .transactionId(transaction.getId())
+                        .type(PocketType.BONUS)
+                        .userId(userId)
+                        .createdAt(LocalDateTime.now())
+                        .build()
+                ));
     }
 
     private void addFreezeBalance(Money money, Long userId) {

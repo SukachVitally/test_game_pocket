@@ -61,7 +61,9 @@ package "Service" {
     CryptoPocketService ..|> PocketServiceInterface
     class FiatPocketService {}
     FiatPocketService ..|> PocketServiceInterface
-    class BonusPocketService {}
+    class BonusPocketService {
+        + void cancelBonus(Long userId)
+    }
     BonusPocketService ..|> PocketServiceInterface
 }
 
