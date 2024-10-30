@@ -10,6 +10,14 @@ box "Pocket services" #LightGreen
     participant FiatPocketService
 end box
 
+box "Repository" #LightYellow
+    participant PocketTransactionRepository
+    participant PocketRepositoryInterface
+    participant BetTransactionRepositoryInterface
+end box
+
 gs -> BonusPocketService: cancel bonus
+BonusPocketService -> PocketTransactionRepository: Create transaction for cancel bonus
+BonusPocketService -> PocketRepositoryInterface: Add entity to bonus pocket with opposite money balance
 
 @enduml
