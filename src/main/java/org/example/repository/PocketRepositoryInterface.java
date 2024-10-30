@@ -7,6 +7,6 @@ import org.example.entity.PocketEntity;
 
 public interface PocketRepositoryInterface {
     PocketEntity save(PocketEntity entity);
-    List<Money> getBalance(Long userId, PocketType type);
+    List<Money> getBalance(Long userId, List<PocketType> types);
     List<PocketEntity> findAllByTransactionId(Long transactionId);
 }

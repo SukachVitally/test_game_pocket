@@ -85,9 +85,10 @@ public class BonusPocketService implements PocketServiceInterface {
                 .build());
     }
 
+    // There we can use new table to collect current user balance.
     @Override
     public List<Money> getBalance(Long userId) {
-        return List.of();
+        return pocketRepository.getBalance(userId, List.of(PocketType.BONUS));
     }
 
     @Override
@@ -111,7 +112,25 @@ public class BonusPocketService implements PocketServiceInterface {
 
     @Override
     public void refund(Long betId) {
-
+        var betTransaction = betTransactionRepository.findByBetId(betId).orElseThrow(BetNotFoundException::new);
+        var transaction = transactionRepository.findById(betTransaction.getTransactionId())
+                .orElseThrow(BetTransactionNotFoundException::new);
+        var refundTransaction = transactionRepository.save(PocketTransactionEntity.builder()
+                        .type(PocketTransactionType.DEPOSIT) /// ???
+                        .userId(transaction.getUserId())
+                        .createdAt(LocalDateTime.now())
+                .build());
+        pocketRepository
+                .findAllByTransactionId(transaction.getId())
+                .forEach(entity -> pocketRepository.save(PocketEntity.builder()
+                        .transactionId(refundTransaction.getId())
+                        .type(entity.getType())
+                        .money(Money.builder()
+                                .amount(-entity.getMoney().getAmount())
+                                .currency(entity.getMoney().getCurrency())
+                                .build())
+                        .build()
+                ));
     }
 
     @Override
@@ -205,11 +224,9 @@ public class BonusPocketService implements PocketServiceInterface {
     }
 
     private Money getFreezeBalance(Long userId, MoneyCurrencyType currencyType) {
-        return pocketRepository.getBalance(userId, PocketType.FREEZE).stream()
+        return pocketRepository.getBalance(userId, List.of(PocketType.FREEZE)).stream()
                 .filter(money -> money.getCurrency().equals(currencyType))
-                .reduce((m1, m2) -> Money.builder()
-                        .amount(m1.getAmount() + m2.getAmount())
-                        .currency(currencyType).build())
+                .findAny()
                 .orElse(Money.builder()
                         .amount(0d)
                         .currency(currencyType)
@@ -217,11 +234,9 @@ public class BonusPocketService implements PocketServiceInterface {
     }
 
     private Money getBonusBalance(Long userId, MoneyCurrencyType currencyType) {
-        return pocketRepository.getBalance(userId, PocketType.BONUS).stream()
+        return pocketRepository.getBalance(userId, List.of(PocketType.BONUS)).stream()
                 .filter(money -> money.getCurrency().equals(currencyType))
-                .reduce((m1, m2) -> Money.builder()
-                        .amount(m1.getAmount() + m2.getAmount())
-                        .currency(currencyType).build())
+                .findAny()
                 .orElse(Money.builder()
                         .amount(0d)
                         .currency(currencyType)
