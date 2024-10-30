@@ -10,11 +10,32 @@ box "Pocket services" #LightGreen
     participant FiatPocketService
 end box
 
+box "Repository" #LightYellow
+    participant PocketTransactionRepository
+    participant PocketRepositoryInterface
+    participant BetTransactionRepositoryInterface
+end box
+
 gs -> BetRepositoryInterface: Create bet entity
 gs -> BonusPocketService: is supported pocket
 gs -> CryptoPocketService: is supported pocket
 gs -> FiatPocketService: is supported pocket
 gs -> gs: Choose pocket service
 gs -> BonusPocketService: Run bet method.
+BonusPocketService -> PocketRepositoryInterface: Get freeze balance
+BonusPocketService -> PocketRepositoryInterface: Get bonus balance
+BonusPocketService -> PocketTransactionRepository: Create transaction
+BonusPocketService -> BetTransactionRepositoryInterface: Add pocket transaction relation to bet
+
+
+alt (freeze balance > bet.amount())
+    BonusPocketService -> PocketRepositoryInterface: Get money from freeze balance
+else (freeze balance < bet.amount() || freeze balance + bonus balance > bet.amount())
+    BonusPocketService -> PocketRepositoryInterface: Get all money from freeze balance
+    BonusPocketService -> PocketRepositoryInterface: Get other money from bonus balance
+    BonusPocketService -> PocketTransactionRepository: Set transaction as bonus
+else
+    BonusPocketService -> BonusPocketService: throw Exception.
+end
 
 @enduml
