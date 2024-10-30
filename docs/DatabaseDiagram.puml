@@ -40,6 +40,16 @@ entity "PocketEntity" as pocket_entity {
   created_at: LocalDateTime
 }
 
+entity "PocketBalanceEntity" as pocket_balance_entity {
+  + id: Long
+  ---
+  type: PocketType
+  money_amount: Float
+  money_currency: varchar
+  user_id: Long
+  updated_at: LocalDateTime
+}
+
 bet_transaction_entity "1..*" -- "1" bet_entity : contains
 pocket_entity "1..*" -- "1" pocket_transaction_entity : contains
 pocket_transaction_entity "1..*" -- "1" bet_transaction_entity : contains
