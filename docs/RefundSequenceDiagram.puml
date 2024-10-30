@@ -10,9 +10,9 @@ box "Pocket services" #LightGreen
     participant FiatPocketService
 end box
 
-gs -> BonusPocketService: is supported operation
-gs -> CryptoPocketService: is supported operation
-gs -> FiatPocketService: is supported operation
+gs -> BonusPocketService: is supported pocket
+gs -> CryptoPocketService: is supported pocket
+gs -> FiatPocketService: is supported pocket
 gs -> gs: Choose pocket service
 gs -> BonusPocketService: Run bet refund.
 
