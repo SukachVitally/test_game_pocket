@@ -1,0 +1,94 @@
+@startuml
+'https://plantuml.com/class-diagram
+left to right direction
+
+package "Constants" {
+    enum MoneyCurrencyType {
+        USD, UAH;
+    }
+
+    enum PocketTransactionType {
+        DEPOSIT, BONUS_ACCRUAL, WITHDRAW, BET, WIN, BONUS_BET, BONUS_WIN, BONUS_PAYOUT;
+    }
+
+    enum PocketType {
+        FIAT, CRYPTO, FREEZE, BONUS
+    }
+}
+
+package "DTO" {
+    class Money {
+        MoneyCurrencyType currency;
+        Double amount;
+    }
+}
+
+package "Repository" {
+    interface BetTransactionRepositoryInterface {
+        + BetTransactionEntity save(BetTransactionEntity entity);
+        + Optional<BetTransactionEntity> findByBetId(Long betId);
+    }
+    interface PocketRepositoryInterface {
+        + PocketEntity save(PocketEntity entity);
+        + List<Money> getBalance(Long userId, PocketType type);
+        + List<PocketEntity> findAllByTransactionId(Long transactionId);
+    }
+
+    interface PocketTransactionRepository {
+        + Boolean hasTransactions(Long userId, PocketTransactionType type);
+        + PocketTransactionEntity save(PocketTransactionEntity entity);
+        + Optional<PocketTransactionEntity> findById(Long transactionId);
+    }
+    interface BetRepositoryInterface {
+        + BetEntity save(BetEntity bet);
+        + Optional<BetEntity> findById(Long betId);
+    }
+}
+
+package "Service" {
+    interface PocketServiceInterface {
+        + void addDeposit(Money money, Long userId);
+        + void bet(Money betMoney, Long userId, Long betId);
+        + void win(Long betId, Money money);
+        + List<Money> getBalance(Long userId);
+        + void withdraw(Long userId, Money money);
+        + void refund(Long betId);
+        + boolean supportPocket(PocketType pocketType);
+        + boolean supportBetId(Long betId);
+    }
+
+    class CryptoPocketService {}
+    CryptoPocketService ..|> PocketServiceInterface
+    class FiatPocketService {}
+    FiatPocketService ..|> PocketServiceInterface
+    class BonusPocketService {}
+    BonusPocketService ..|> PocketServiceInterface
+}
+
+class GameService {
+    + void addDeposit(UserEntity user, Money money, PocketType pocketType)
+    + Long bet(UserEntity user, Money money, PocketType pocketType)
+    + void win(Long betId, Money money)
+    + void withdraw(UserEntity user, Money money, PocketType pocketType)
+    + void refund(Long betId)
+}
+FiatPocketService --> "uses" BetTransactionRepositoryInterface
+FiatPocketService --> "uses" PocketRepositoryInterface
+FiatPocketService --> "uses" PocketTransactionRepository
+
+CryptoPocketService --> "uses" BetTransactionRepositoryInterface
+CryptoPocketService --> "uses" PocketRepositoryInterface
+CryptoPocketService --> "uses" PocketTransactionRepository
+
+BonusPocketService --> "uses" BetTransactionRepositoryInterface
+BonusPocketService --> "uses" PocketRepositoryInterface
+BonusPocketService --> "uses" PocketTransactionRepository
+
+
+GameService --> "uses" PocketTransactionRepository
+GameService --> "uses" BetRepositoryInterface
+GameService --> "uses" FiatPocketService
+GameService --> "uses" CryptoPocketService
+GameService --> "uses" BonusPocketService
+
+@enduml

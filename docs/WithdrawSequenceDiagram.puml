@@ -1,0 +1,19 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+participant GameService as gs
+participant BetRepositoryInterface
+box "Pocket services" #LightGreen
+    participant BonusPocketService
+    participant CryptoPocketService
+    participant FiatPocketService
+end box
+
+gs -> BonusPocketService: is supported operation
+gs -> CryptoPocketService: is supported operation
+gs -> FiatPocketService: is supported operation
+gs -> gs: Choose pocket service
+gs -> BonusPocketService: Run withdraw.
+
+@enduml

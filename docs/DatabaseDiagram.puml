@@ -1,0 +1,46 @@
+@startuml
+left to right direction
+entity "BetEntity" as bet_entity {
+  + id: Long
+  ---
+  user_id: Long
+  bet_amount: Float
+  bet_currency: varchar
+  win_amount: Float
+  win_currency: varchar
+  created_at: LocalDateTime
+  completed_at: LocalDateTime
+}
+
+entity "BetTransactionEntity" as bet_transaction_entity {
+  + id: Long
+  ---
+  bet_id: Long
+  transaction_id: Long
+  created_at: LocalDateTime
+}
+
+
+entity "PocketTransactionEntity" as pocket_transaction_entity {
+  + id: Long
+  ---
+  type: PocketTransactionType
+  user_id: Long
+  created_at: LocalDateTime
+}
+
+entity "PocketEntity" as pocket_entity {
+  + id: Long
+  ---
+  type: PocketType
+  money_amount: Float
+  money_currency: varchar
+  transaction_id: Long
+  user_id: Long
+  created_at: LocalDateTime
+}
+
+bet_transaction_entity "1..*" -- "1" bet_entity : contains
+pocket_entity "1..*" -- "1" pocket_transaction_entity : contains
+pocket_transaction_entity "1..*" -- "1" bet_transaction_entity : contains
+@enduml
